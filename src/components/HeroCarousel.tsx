@@ -36,8 +36,8 @@ export default function HeroCarousel({ movies, onPlay }: HeroCarouselProps) {
         modules={[EffectCoverflow, Autoplay, Pagination]}
         className="w-full h-full py-20"
       >
-        {movies.slice(0, 10).map((movie) => (
-          <SwiperSlide key={movie.id} className="w-[85%] lg:w-[60%] h-[70vh] lg:h-[80vh] rounded-2xl overflow-hidden shadow-2xl transition-transform duration-500">
+        {movies.slice(0, 10).map((movie, index) => (
+          <SwiperSlide key={`${movie.id}-${index}`} className="w-[85%] lg:w-[60%] h-[70vh] lg:h-[80vh] rounded-2xl overflow-hidden shadow-2xl transition-transform duration-500">
             <div className="relative w-full h-full group">
               {/* Background Backdrop */}
               <div className="absolute inset-0">

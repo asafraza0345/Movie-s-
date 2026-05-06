@@ -1,7 +1,8 @@
 import { motion, AnimatePresence } from "motion/react";
-import { X, Play, Plus, ThumbsUp, ThumbsDown, Share2, Info, Cast, ChevronRight, Globe, Check, Loader2, Star } from "lucide-react";
+import { X, Play, Plus, ThumbsUp, ThumbsDown, Share2, Info, Cast, ChevronRight, Globe, Check, Loader2, Star, Download } from "lucide-react";
 import { Movie } from "../types";
 import { useAuth } from "../context/AuthContext";
+import { useDownloads } from "../context/DownloadContext";
 import { cn } from "../lib/utils";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -47,6 +48,7 @@ interface MovieDetailsProps {
 
 export default function MovieDetails({ movie, onClose, onPlay, onMovieSelect }: MovieDetailsProps) {
   const { user, updateWatchlist } = useAuth();
+  const { startDownload, isItemDownloaded, downloadingIds } = useDownloads();
   const navigate = useNavigate();
   const [details, setDetails] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -228,6 +230,24 @@ export default function MovieDetails({ movie, onClose, onPlay, onMovieSelect }: 
                 updateWatchlist(movie.id.toString(), isInWatchlist ? "remove" : "add");
               }}
             />
+            {user?.isPremium && (
+              <ActionButton 
+                icon={
+                  downloadingIds.has(movie.id.toString()) ? (
+                    <Loader2 size={24} className="animate-spin text-blue-400" />
+                  ) : isItemDownloaded(movie.id.toString()) ? (
+                    <Check size={24} className="text-green-500" />
+                  ) : (
+                    <Download size={24} />
+                  )
+                } 
+                label={downloadingIds.has(movie.id.toString()) ? "Downloading" : isItemDownloaded(movie.id.toString()) ? "Downloaded" : "Download"} 
+                onClick={(e) => {
+                  e?.stopPropagation();
+                  startDownload(movie);
+                }}
+              />
+            )}
             <ActionButton icon={<ThumbsUp size={24} />} label="Like" />
             <ActionButton icon={<ThumbsDown size={24} />} label="Not for me" />
             <ActionButton icon={<Share2 size={24} />} label="Share" />
@@ -249,7 +269,7 @@ export default function MovieDetails({ movie, onClose, onPlay, onMovieSelect }: 
                  {movieGenres.length > 0 && (
                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-bold text-gray-400">
                       {movieGenres.map((genre, idx) => (
-                        <div key={genre.id || idx} className="flex items-center gap-2">
+                        <div key={`${genre.id || idx}-${idx}`} className="flex items-center gap-2">
                            <button 
                              onClick={() => handleGenreClick(genre.name)}
                              className="hover:text-white transition-colors cursor-pointer"
@@ -306,9 +326,9 @@ export default function MovieDetails({ movie, onClose, onPlay, onMovieSelect }: 
                 </button>
               </div>
               <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar -mx-2 px-2">
-                {details.credits.cast?.slice(0, 10).map((person: any) => (
+                {details.credits.cast?.slice(0, 10).map((person: any, idx: number) => (
                   <div 
-                    key={person.id} 
+                    key={`${person.id}-${idx}`} 
                     className="flex-shrink-0 w-24 space-y-2 group cursor-pointer"
                     onClick={() => setSelectedPerson(person)}
                   >
@@ -335,9 +355,9 @@ export default function MovieDetails({ movie, onClose, onPlay, onMovieSelect }: 
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <h3 className="text-white font-black uppercase tracking-widest text-xs">Seasons & Episodes</h3>
                 <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
-                  {details.seasons.filter((s: any) => s.season_number > 0).map((season: any) => (
+                  {details.seasons.filter((s: any) => s.season_number > 0).map((season: any, idx: number) => (
                     <button
-                      key={season.id}
+                      key={`${season.id}-${idx}`} 
                       onClick={() => setSelectedSeason(season.season_number)}
                       className={cn(
                         "px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tighter transition-all border",
@@ -358,9 +378,9 @@ export default function MovieDetails({ movie, onClose, onPlay, onMovieSelect }: 
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {seasonDetails?.episodes?.map((episode: any) => (
+                  {seasonDetails?.episodes?.map((episode: any, idx: number) => (
                     <motion.div
-                      key={episode.id}
+                      key={`${episode.id}-${idx}`} 
                       whileHover={{ x: 4 }}
                       onClick={() => onPlay({
                         ...movie,
@@ -404,6 +424,28 @@ export default function MovieDetails({ movie, onClose, onPlay, onMovieSelect }: 
                            <span className="text-gray-600 text-[10px] font-bold uppercase tracking-widest">
                              {new Date(episode.air_date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
                            </span>
+                           {user?.isPremium && (
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  startDownload({
+                                    ...movie,
+                                    id: episode.id,
+                                    title: `${movie.title || movie.name} - S${episode.season_number}E${episode.episode_number}: ${episode.name}`,
+                                    backdrop_path: episode.still_path || movie.backdrop_path,
+                                  });
+                                }}
+                                className="ml-auto p-1.5 rounded-full hover:bg-white/10 transition-colors text-gray-500 hover:text-blue-400"
+                              >
+                                {downloadingIds.has(episode.id.toString()) ? (
+                                  <Loader2 size={14} className="animate-spin" />
+                                ) : isItemDownloaded(episode.id.toString()) ? (
+                                  <Check size={14} className="text-green-500" />
+                                ) : (
+                                  <Download size={14} />
+                                )}
+                              </button>
+                           )}
                         </div>
                       </div>
                     </motion.div>
@@ -418,9 +460,9 @@ export default function MovieDetails({ movie, onClose, onPlay, onMovieSelect }: 
             <div className="space-y-4 pt-6 border-t border-white/5">
               <h3 className="text-white font-black uppercase tracking-widest text-xs">Related Videos</h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                {details.recommendations.results.slice(0, 6).map((rec: Movie) => (
+                {details.recommendations.results.slice(0, 6).map((rec: Movie, idx: number) => (
                   <motion.div 
-                    key={rec.id}
+                    key={`${rec.id}-${idx}`}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => onMovieSelect?.(rec)}

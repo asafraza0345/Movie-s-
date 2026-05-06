@@ -83,9 +83,9 @@ export default function PersonDetails({ person, onClose, onMovieSelect }: Person
             </div>
           ) : credits.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {credits.map((item) => (
+              {credits.map((item, index) => (
                 <motion.div
-                  key={item.id}
+                  key={`${item.id}-${index}`}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => {

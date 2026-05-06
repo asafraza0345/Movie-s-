@@ -26,7 +26,7 @@ export default function BottomNav() {
       label: "Watchlist", 
       path: "/watchlist" 
     },
-    { icon: <Download size={24} />, label: "Downloads", path: "/watchlist" },
+    { icon: <Download size={24} />, label: "Downloads", path: "/downloads" },
     { icon: <Search size={24} />, label: "Search", path: "/search" },
   ];
 

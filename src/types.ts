@@ -11,6 +11,7 @@ export interface Movie {
   media_type?: "movie" | "tv";
   genre_ids?: number[];
   trailer_key?: string;
+  original_language?: string;
 }
 
 export interface UserProfile {

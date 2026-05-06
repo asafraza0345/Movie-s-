@@ -57,8 +57,8 @@ export default function MovieRow({ title, movies, onPlay }: MovieRowProps) {
           ref={rowRef}
           className="flex gap-4 overflow-x-scroll scrollbar-hide pb-8 pt-4 no-scrollbar"
         >
-          {movies.map((movie) => (
-            <MovieCard key={movie.id} movie={movie} onPlay={onPlay} />
+          {movies.map((movie, index) => (
+            <MovieCard key={`${movie.id}-${index}`} movie={movie} onPlay={onPlay} />
           ))}
         </div>
       </div>

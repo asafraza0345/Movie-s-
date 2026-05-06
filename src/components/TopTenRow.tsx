@@ -59,7 +59,7 @@ export default function TopTenRow({ movies, onPlay }: TopTenRowProps) {
           className="flex gap-4 overflow-x-scroll scrollbar-hide pb-8 pt-4 no-scrollbar pr-20"
         >
           {movies.slice(0, 10).map((movie, index) => (
-            <div key={movie.id} className="relative flex-shrink-0 flex items-end">
+            <div key={`${movie.id}-${index}`} className="relative flex-shrink-0 flex items-end">
               <div className="absolute -left-4 -bottom-6 z-10 select-none">
                  <span className="text-[180px] font-black leading-none text-black stroke-white stroke-2" style={{ WebkitTextStroke: '4px #333' }}>
                     {index + 1}

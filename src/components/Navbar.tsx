@@ -47,6 +47,7 @@ export default function Navbar() {
           <Link to="/series" className="hover:text-white transition-colors">Series</Link>
           <Link to="/trending" className="hover:text-white transition-colors">New & Popular</Link>
           <Link to="/watchlist" className="hover:text-white transition-colors">My List</Link>
+          <Link to="/downloads" className="hover:text-white transition-colors">Downloads</Link>
         </div>
       </div>
 
